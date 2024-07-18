@@ -1,12 +1,14 @@
 import torch
-import blazetorch  # Ensure the custom backend library is loaded
+import torch.testing as tt
 
-# Use the custom add function from the custom backend
+# BlazeTorch backend
+import blazetorch
+
 a = torch.tensor([1.0, 2.0, 3.0])
 b = torch.tensor([4.0, 5.0, 6.0])
 
-# Call the custom add function
-result = blazetorch.add(a, b)
+blazetorch_result = blazetorch.add(a, b)
+torch_result = torch.add(a, b)
 
-# Print the result
-print(f"Result of custom_add: {result}")
+tt.assert_close(blazetorch_result, torch_result, rtol=1e-5, atol=1e-5)
+print("Results Match!")

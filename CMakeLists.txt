@@ -1,18 +1,21 @@
 cmake_minimum_required(VERSION 3.15)
 project(blazetorch)
 
-# Set Torch_DIR to the directory containing TorchConfig.cmake
-set(Torch_DIR /home/aslavescu/miniconda3/lib/python3.11/site-packages/torch/share/cmake/Torch)
+# Find the Python interpreter
+find_package(Python3 COMPONENTS Interpreter Development REQUIRED)
+
+execute_process(
+  COMMAND ${Python3_EXECUTABLE} -c "import torch; import os; print(os.path.join(torch.__path__[0], 'share', 'cmake', 'Torch'))"
+  OUTPUT_VARIABLE Torch_DIR
+  OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+
 set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} ${Torch_DIR})
 
 find_package(Torch REQUIRED)
-
-# Specify CUDA architecture
-set(CMAKE_CUDA_ARCHITECTURES 86)
 
 add_library(blazetorch SHARED register.cc)
 target_link_libraries(blazetorch "${TORCH_LIBRARIES}")
 set_property(TARGET blazetorch PROPERTY CXX_STANDARD 17)
 
-# Include directories
-include_directories(${TORCH_INCLUDE_DIRS})
+include_directories(${TORCH_INCLUDE_DIRS} ${Python3_INCLUDE_DIRS})
