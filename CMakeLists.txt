@@ -14,7 +14,16 @@ set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} ${Torch_DIR})
 
 find_package(Torch REQUIRED)
 
-add_library(blazetorch SHARED register.cc)
+add_library(
+  blazetorch SHARED 
+  blazetorch/register.cc 
+  blazetorch/blazetorch_compiler.cc 
+  blazetorch/compiler.cc 
+  blazetorch/fuse_candidates.cc 
+  blazetorch/fusion_passes/fusion_adddiv.cc
+  blazetorch/fusion_passes/fusion_addmul.cc
+)
+
 target_link_libraries(blazetorch "${TORCH_LIBRARIES}")
 set_property(TARGET blazetorch PROPERTY CXX_STANDARD 17)
 
