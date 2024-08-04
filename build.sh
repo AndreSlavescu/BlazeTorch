@@ -7,4 +7,4 @@ fi
 
 mkdir "$build_dir" && cd "$build_dir"
 cmake ..
-make -j 8
+make -j 16
