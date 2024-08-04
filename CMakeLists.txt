@@ -13,15 +13,15 @@ execute_process(
 set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} ${Torch_DIR})
 
 find_package(Torch REQUIRED)
+file(GLOB_RECURSE BLAZETORCH_SOURCES "blazetorch/*.cc" "blazetorch/fusion_passes/*.cc")
+message(STATUS "BlazeTorch sources:")
+foreach(source ${BLAZETORCH_SOURCES})
+  message(STATUS "  ${source}")
+endforeach()
 
 add_library(
   blazetorch SHARED 
-  blazetorch/register.cc 
-  blazetorch/blazetorch_compiler.cc 
-  blazetorch/compiler.cc 
-  blazetorch/fuse_candidates.cc 
-  blazetorch/fusion_passes/fusion_adddiv.cc
-  blazetorch/fusion_passes/fusion_addmul.cc
+  ${BLAZETORCH_SOURCES}
 )
 
 target_link_libraries(blazetorch "${TORCH_LIBRARIES}")

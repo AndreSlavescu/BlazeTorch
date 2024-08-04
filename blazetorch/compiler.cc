@@ -8,75 +8,7 @@
 #include "compiler.h"
 
 using namespace torch::jit;
-
 bool tdebug = false;
-
-c10::List<int64_t> get_const_intlist(Value *input)
-{
-    auto nn = std::unique_ptr<Node>(input->node());
-    assert(nn->kind() == prim::Constant);
-    assert(nn->outputs().size() == 1);
-    auto ivalue = toIValue(nn->outputs()[0]);
-    assert(ivalue.has_value());
-    assert(ivalue->isIntList());
-    return ivalue->toIntList();
-}
-
-int64_t get_const_int(Value *input)
-{
-    auto nn = std::unique_ptr<Node>(input->node());
-    assert(nn->kind() == prim::Constant);
-    assert(nn->outputs().size() == 1);
-    auto ivalue = toIValue(nn->outputs()[0]);
-    assert(ivalue.has_value());
-    assert(ivalue->isInt());
-    return ivalue->toInt();
-}
-
-double get_const_double(Value *input)
-{
-    auto nn = std::unique_ptr<Node>(input->node());
-    assert(nn->kind() == prim::Constant);
-    assert(nn->outputs().size() == 1);
-    auto ivalue = toIValue(nn->outputs()[0]);
-    assert(ivalue.has_value());
-    assert(ivalue->isDouble());
-    return ivalue->toDouble();
-}
-
-bool get_const_bool(Value *input)
-{
-    auto nn = std::unique_ptr<Node>(input->node());
-    assert(nn->kind() == prim::Constant);
-    assert(nn->outputs().size() == 1);
-    auto ivalue = toIValue(nn->outputs()[0]);
-    assert(ivalue.has_value());
-    assert(ivalue->isBool());
-    return ivalue->toBool();
-}
-
-c10::intrusive_ptr<c10::ivalue::ConstantString> get_const_string(Value *input)
-{
-    auto nn = std::unique_ptr<Node>(input->node());
-    assert(nn->kind() == prim::Constant);
-    assert(nn->outputs().size() == 1);
-    auto ivalue = toIValue(nn->outputs()[0]);
-    assert(ivalue.has_value());
-    assert(ivalue->isString());
-    return ivalue->toString(); 
-}
-
-at::Tensor get_tensor(IValue *input)
-{
-    assert(input->isTensor());
-    return input->toTensor();
-}
-
-c10::List<at::Tensor> get_listtensor(IValue *input)
-{
-    assert(input->isTensorList());
-    return input->toTensorList();
-}
 
 static void print_node(Node *node)
 {
@@ -171,9 +103,9 @@ void blazeTorchCompiler::processGraph(std::shared_ptr<Compiled_info> cinfo, cons
                 in_node = node;  
             }
             if (node->kind() == aten::matmul) {
-                process_matmul(cinfo, node, value_to_ivalue, out_dim, w_size);
+                process_matmul(cinfo, node, value_to_ivalue, out_dim, w_size, tdebug);
             } else if (node->kind() == aten::div) {
-                process_div(cinfo, node, w_size);
+                process_div(cinfo, node, w_size, tdebug);
             }
         }
     }
