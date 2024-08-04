@@ -43,7 +43,7 @@ void register_opt()
         getBlazetorchSymbol(),
         [](const torch::jit::Node *node) -> torch::jit::Operation 
         {
-            auto compiler = std::make_shared<optCompiler>(node);
+            auto compiler = std::make_shared<blazeTorchCompiler>(node);
             return [compiler](torch::jit::Stack& stack) {
                 compiler->run(&stack); return 0;
             }; 

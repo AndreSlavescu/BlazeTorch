@@ -59,10 +59,10 @@ def test_layer():
         trace_jit = torch.jit.freeze(trace_jit.eval())
 
         trace_jit(x) # run optimize and have execution_plan
-        ti = my_profile(trace_jit, [x], iter, 'optim_bertlayer_trace.json')# run with optim
+        ti = my_profile(trace_jit, [x], iter, 'optim_bertlayer_trace.json') # run with optim
         print('TIME AFTER optimize: {} [s] '.format(ti))
         
-        # print(torch.jit.last_executed_optimized_graph())
+        print(torch.jit.last_executed_optimized_graph())
         blazetorch.disable()
         ti = my_profile(model, [x], iter, 'base_bertlayer_trace.json')
         print('TIME BEFORE optimize: {} [s] '.format(ti))
@@ -106,8 +106,8 @@ def test_model():
         
         # warm-up
         _ = run_model(trace_jit, [tokens_tensor, segments_tensors])
-        
         ti_optimized = my_profile(run_model, [trace_jit, [tokens_tensor, segments_tensors]], iter, 'optim_bertmodel_trace.json')        
+        
         # Test without blazetorch optimization
         blazetorch.disable()
         ti_base = my_profile(run_model, [model, [tokens_tensor, segments_tensors]], iter, 'base_bertmodel_trace.json')
