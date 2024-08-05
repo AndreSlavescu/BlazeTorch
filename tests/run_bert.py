@@ -45,14 +45,14 @@ def replace_layers(model, device):
         if isinstance(module, GELUActivation):
             setattr(model, n, torch.nn.ReLU(inplace=True).to(device))
 
-def my_profile(f, x: List, iter: int = 1000, name: str = "profile.json", generate_trace: bool = False, device: str = "cpu"):
+def my_profile(f, x: List, iter: int = 1000, name: str = "profile.json", gen_trace: bool = False, device: str = "cpu"):
     start = time.perf_counter()
     for _ in range(iter):
         f(*x)  # optimized run
     end = time.perf_counter()
     avg_time = (end - start) / iter
 
-    if generate_trace:
+    if gen_trace:
         if device == "cuda":
             with profile(activities=[ProfilerActivity.CPU, ProfilerActivity.CUDA], record_shapes=True) as shape_prof:
                 with record_function("model_inference"):
@@ -74,7 +74,7 @@ def my_profile(f, x: List, iter: int = 1000, name: str = "profile.json", generat
 
     return avg_time
 
-def test_bert_model(device: torch.device, generate_trace: bool, iter: int, debug: bool):
+def test_bert_model(device: torch.device, gen_trace: bool, iter: int, debug: bool):
     try:
         batch_size = 1
         seq_length = 32 
@@ -96,7 +96,7 @@ def test_bert_model(device: torch.device, generate_trace: bool, iter: int, debug
         inputs = [tokens_tensor, attention_mask, segments_tensors]
 
         trace_jit(*inputs)  # run optimize and have execution_plan
-        ti_optimized = my_profile(trace_jit, inputs, iter, f'optim_bertlayer_trace_{device}.json', generate_trace, device=device)
+        ti_optimized = my_profile(trace_jit, inputs, iter, f'optim_bert_model_trace_{device}.json', gen_trace, device=device)
         print(f'TIME AFTER optimize on {device}: {ti_optimized} [s]')
 
         optimized_output = trace_jit(*inputs)
@@ -126,7 +126,7 @@ def test_bert_model(device: torch.device, generate_trace: bool, iter: int, debug
             print(f"\nOptimized JIT graph:\n{trace_jit.graph}")
             print(f"\nLast executed optimized graph:\n{torch.jit.last_executed_optimized_graph()}")
         
-        ti_base = my_profile(model, inputs, iter, f'base_bertlayer_trace_{device}.json', generate_trace, device=device)
+        ti_base = my_profile(model, inputs, iter, f'base_bert_model_trace_{device}.json', gen_trace, device=device)
         print(f'TIME BEFORE optimize on {device}: {ti_base} [s]')
 
         speedup = (ti_base - ti_optimized) / ti_base * 100
@@ -140,12 +140,18 @@ def test_bert_model(device: torch.device, generate_trace: bool, iter: int, debug
         traceback.print_exc()
 
 if __name__ == "__main__":
+    import os
+
     parser = ArgumentParser(description="Profile BERT")
-    parser.add_argument('--generate_trace', action='store_true', help='Generate execution trace')
+    parser.add_argument('--gen_trace', action='store_true', help='Generate execution trace')
     parser.add_argument('--debug', action='store_true', help='Enable debug mode')
     parser.add_argument('--iter', type=int, default=100, help='Number of iterations for profiling')
     args = parser.parse_args()
 
+    tests_dir = os.path.dirname(os.path.abspath(__file__))
+    traces_dir = os.path.join(tests_dir, 'traces')
+    os.makedirs(traces_dir, exist_ok=True)
+
     if torch.cuda.is_available():
-        test_bert_model(torch.device('cuda'), args.generate_trace, args.iter, args.debug)
-    test_bert_model(torch.device('cpu'), args.generate_trace, args.iter, args.debug)
+        test_bert_model(torch.device('cuda'), args.gen_trace, args.iter, args.debug)
+    test_bert_model(torch.device('cpu'), args.gen_trace, args.iter, args.debug)

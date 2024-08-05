@@ -14,7 +14,6 @@ chmod +x build.sh
 
 All tests are hosted in the tests directory. To test the optimized compiler and see the end to end speedup for BERT, run the following:
 ```
-cd tests
 python3 run_bert.py
 ```
 
@@ -22,6 +21,8 @@ To generate the graph trace for the optimized and base torch eager execution pro
 ```
 python3 run_bert.py --generate_trace
 ```
+
+traces will be hosted in a built ```traces/``` directory within ```tests/```
 
 adapted and extended from:
 
