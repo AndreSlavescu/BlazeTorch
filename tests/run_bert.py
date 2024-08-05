@@ -74,7 +74,7 @@ def my_profile(f, x: List, iter: int = 1000, name: str = "profile.json", generat
 
     return avg_time
 
-def test_layer(device: torch.device, generate_trace: bool, iter: int, debug: bool):
+def test_bert_model(device: torch.device, generate_trace: bool, iter: int, debug: bool):
     try:
         batch_size = 1
         seq_length = 32 
@@ -135,7 +135,7 @@ def test_layer(device: torch.device, generate_trace: bool, iter: int, debug: boo
         print(f'Speedup achieved on {device}: {speedup:.2f}%')
 
     except Exception as e:
-        print(f"Error in test_layer for device {device}: {str(e)}")
+        print(f"Error in test_bert_model for device {device}: {str(e)}")
         import traceback
         traceback.print_exc()
 
@@ -143,9 +143,9 @@ if __name__ == "__main__":
     parser = ArgumentParser(description="Profile BERT")
     parser.add_argument('--generate_trace', action='store_true', help='Generate execution trace')
     parser.add_argument('--debug', action='store_true', help='Enable debug mode')
-    parser.add_argument('--iter', type=int, default=10, help='Number of iterations for profiling')
+    parser.add_argument('--iter', type=int, default=100, help='Number of iterations for profiling')
     args = parser.parse_args()
 
     if torch.cuda.is_available():
-        test_layer(torch.device('cuda'), args.generate_trace, args.iter, args.debug)
-    test_layer(torch.device('cpu'), args.generate_trace, args.iter, args.debug)
+        test_bert_model(torch.device('cuda'), args.generate_trace, args.iter, args.debug)
+    test_bert_model(torch.device('cpu'), args.generate_trace, args.iter, args.debug)
