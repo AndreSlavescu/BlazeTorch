@@ -3,7 +3,6 @@
 #include <torch/csrc/jit/ir/ir.h>
 #include <torch/csrc/jit/runtime/argument_spec.h>
 #include <ATen/ATen.h>
-#include "fuse_candidates.h"
 
 using namespace torch::jit;
 

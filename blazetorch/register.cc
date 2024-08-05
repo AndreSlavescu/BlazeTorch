@@ -1,4 +1,3 @@
-
 #include <pybind11/pybind11.h>
 #include <torch/script.h>
 #include <torch/extension.h>
@@ -28,15 +27,41 @@ void register_opt()
 {
     torch::jit::RegisterPass pass([](std::shared_ptr<Graph> &g)
     {
-        if (opt_enabled) 
+        if (opt_enabled)
         {
-            FuseLinear(g);
-            BatchMM(g);
-            FuseAddRelu(g);
-            FuseAddDiv(g);
-            FuseAddMul(g);
-            FuseSupportedOps(g);
-        } 
+            bool has_cuda_tensor = false;
+            for (const auto& input : g->inputs()) {
+                if (input->type()->isSubtypeOf(TensorType::get())) {
+                    auto device = input->type()->cast<TensorType>()->device();
+                    if (device.has_value() && device->is_cuda()) {
+                        has_cuda_tensor = true;
+                        break;
+                    }
+                }
+            }
+            if (!has_cuda_tensor) {
+                for (const auto& output : g->outputs()) {
+                    if (output->type()->isSubtypeOf(TensorType::get())) {
+                        auto device = output->type()->cast<TensorType>()->device();
+                        if (device.has_value() && device->is_cuda()) {
+                            has_cuda_tensor = true;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if (has_cuda_tensor) {
+                // torch::jit::fuser::cuda::fuseGraph(g); // this has been deprecated so need to update this
+            } else {
+                FuseLinear(g);
+                BatchMM(g);
+                FuseAddRelu(g);
+                FuseAddDiv(g);
+                FuseAddMul(g);
+                FuseSupportedOps(g);
+            } 
+        }
     });
 
     torch::jit::RegisterOperators op({torch::jit::Operator(

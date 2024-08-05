@@ -3,8 +3,6 @@
 #include <numeric>
 #include <c10/util/C++17.h>
 #include <ATen/ATen.h>
-#include <string>
-#include "process_graph_ops.h"
 #include "compiler.h"
 
 using namespace torch::jit;
@@ -84,6 +82,40 @@ void blazeTorchCompiler::run(torch::jit::Stack *stack)
     at::Tensor in_data = get_tensor(&value_to_ivalue[cinfo->in_node->input(0)]);
     auto out_tensor = at::matmul(in_data, cinfo->weight);
 
+    if (tdebug) {
+        // input tensor
+        for (const auto& input : inputs) {
+            if (input.isTensor()) {
+                const auto& tensor = input.toTensor();
+                std::cout << "Input Tensor: [" 
+                          << tensor.sizes() << ", " 
+                          << tensor.dtype() << ", " 
+                          << tensor.device() << "]" 
+                          << std::endl;
+            }
+        }
+
+        // output tensor
+        for (const auto& output : subgraph_->outputs()) {
+            if (output->type()->isSubtypeOf(TensorType::get())) {
+                auto tensor_type = output->type()->expect<TensorType>();
+                std::cout << "Output Tensor: [";
+                if (tensor_type->sizes().isComplete()) {
+                    std::cout << tensor_type->sizes().concrete_sizes().value();
+                } else {
+                    std::cout << "unknown_size";
+                }
+                std::cout << ", " << tensor_type->scalarType().value_or(at::ScalarType::Undefined);
+                if (tensor_type->device().has_value()) {
+                    std::cout << ", " << tensor_type->device().value();
+                } else {
+                    std::cout << ", unknown_device";
+                }
+                std::cout << "]" << std::endl;
+            }
+        }
+    }
+
     drop(stack, num_inputs); 
     for (auto &output : subgraph_->outputs()) {
         auto var = torch::autograd::make_variable(out_tensor);
@@ -124,7 +156,7 @@ void blazeTorchCompiler::processGraph(std::shared_ptr<Compiled_info> cinfo, cons
     osizes.back() = out_dim;
 
     if (tdebug) {
-        std::cout << "Inputs:" << in_data.sizes() << std::endl;
+        std::cout << "Inputs: [" << in_data.sizes() << ", " << in_data.dtype() << ", " << in_data.device() << "]" << std::endl;
     }
 
     cinfo->out_shape = std::move(osizes);

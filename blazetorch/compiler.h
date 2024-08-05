@@ -3,6 +3,7 @@
 #include <torch/csrc/jit/ir/ir.h>
 #include <torch/csrc/jit/runtime/argument_spec.h>
 #include <ATen/ATen.h>
+#include "process_graph_ops.h"
 #include "fuse_candidates.h"
 
 using namespace torch::jit;
@@ -24,7 +25,6 @@ public:
     void setGraphSize(int g_size);
     void run(torch::jit::Stack *stack);
     void processGraph(std::shared_ptr<Compiled_info> cinfo, const std::unordered_map<Value*, IValue>& value_to_ivalue);
-
 
 private:
     std::shared_ptr<torch::jit::Graph> subgraph_;                                 
