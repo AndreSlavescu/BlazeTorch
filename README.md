@@ -2,6 +2,12 @@
 
 A toy torch jit custom compiler to accelerate models.
 
+## Clone and Build Dependencies
+```
+git clone https://github.com/AndreSlavescu/BlazeTorch
+git submodule update --init --recursive
+```
+
 ## Build
 
 The project gets built with CMake by running:

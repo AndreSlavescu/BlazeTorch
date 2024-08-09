@@ -1,0 +1,3 @@
+[submodule "submodules/nvfuser"]
+	path = submodules/nvfuser
+	url = https://github.com/NVIDIA/Fuser.git
