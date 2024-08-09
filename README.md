@@ -3,9 +3,21 @@
 A toy torch jit custom compiler to accelerate models.
 
 ## Clone and Build Dependencies
+Before building, make sure you have cmake installed. Tested on cmake version 3.29.3.
+
 ```
 git clone https://github.com/AndreSlavescu/BlazeTorch
 git submodule update --init --recursive
+
+# build flatbuffers with appropriate version (23 major version and 3 minor version)
+cd submodules/nvfuser/third_party/flatbuffers
+git fetch --all
+git checkout v23.3.3
+mkdir build && cd build
+cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$HOME/local ..
+make -j$(nproc)
+make install
+cd ../../../../..
 ```
 
 ## Build

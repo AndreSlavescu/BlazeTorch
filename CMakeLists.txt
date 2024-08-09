@@ -19,7 +19,7 @@ execute_process(
   OUTPUT_STRIP_TRAILING_WHITESPACE
 )
 
-set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} ${Torch_DIR} ${pybind11_DIR} ${CMAKE_SOURCE_DIR}/submodules/nvfuser/third_party/flatbuffers)
+set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} ${Torch_DIR} ${pybind11_DIR} $ENV{HOME}/local)
 
 find_package(Torch REQUIRED)
 find_package(pybind11 REQUIRED)
@@ -38,7 +38,7 @@ add_library(
   ${BLAZETORCH_SOURCES}
 )
 
-target_link_libraries(blazetorch "${TORCH_LIBRARIES}" nvfuser flatbuffers)
+target_link_libraries(blazetorch "${TORCH_LIBRARIES}" nvfuser_codegen flatbuffers)
 set_property(TARGET blazetorch PROPERTY CXX_STANDARD 17)
 
 include_directories(${TORCH_INCLUDE_DIRS} ${Python3_INCLUDE_DIRS} submodules/nvfuser ${pybind11_INCLUDE_DIRS} ${FLATBUFFERS_INCLUDE_DIRS})
