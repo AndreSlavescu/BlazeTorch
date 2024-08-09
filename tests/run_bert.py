@@ -10,6 +10,8 @@ import os
 
 torch.manual_seed(0)
 
+ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
 def check_output(output, name, device):
     border = "=" * 50
     header = f" {name.upper()} OUTPUT CHECK ON {str(device).upper()} "
@@ -53,6 +55,10 @@ def my_profile(f, x: List, iter: int = 1000, name: str = "profile.json", gen_tra
     avg_time = (end - start) / iter
 
     if gen_trace:
+        traces_dir = os.path.join(ROOT_DIR, 'tests', 'traces')
+        os.makedirs(traces_dir, exist_ok=True)
+        trace_path = os.path.join(traces_dir, name)
+
         if device == "cuda":
             with profile(activities=[ProfilerActivity.CPU, ProfilerActivity.CUDA], record_shapes=True) as shape_prof:
                 with record_function("model_inference"):
@@ -61,7 +67,7 @@ def my_profile(f, x: List, iter: int = 1000, name: str = "profile.json", gen_tra
 
             with profile(activities=[ProfilerActivity.CPU, ProfilerActivity.CUDA]) as prof:
                 f(*x)
-            prof.export_chrome_trace(os.path.join('traces', name))
+            prof.export_chrome_trace(trace_path)
         else:
             with profile(activities=[ProfilerActivity.CPU], record_shapes=True) as shape_prof:
                 with record_function("model_inference"):
@@ -70,7 +76,7 @@ def my_profile(f, x: List, iter: int = 1000, name: str = "profile.json", gen_tra
 
             with profile(activities=[ProfilerActivity.CPU]) as prof:
                 f(*x)
-            prof.export_chrome_trace(os.path.join('traces', name))
+            prof.export_chrome_trace(trace_path)
 
     return avg_time
 
@@ -140,17 +146,11 @@ def test_bert_model(device: torch.device, gen_trace: bool, iter: int, debug: boo
         traceback.print_exc()
 
 if __name__ == "__main__":
-    import os
-
     parser = ArgumentParser(description="Profile BERT")
     parser.add_argument('--gen_trace', action='store_true', help='Generate execution trace')
     parser.add_argument('--debug', action='store_true', help='Enable debug mode')
     parser.add_argument('--iter', type=int, default=100, help='Number of iterations for profiling')
     args = parser.parse_args()
-
-    tests_dir = os.path.dirname(os.path.abspath(__file__))
-    traces_dir = os.path.join(tests_dir, 'traces')
-    os.makedirs(traces_dir, exist_ok=True)
 
     if torch.cuda.is_available():
         test_bert_model(torch.device('cuda'), args.gen_trace, args.iter, args.debug)
