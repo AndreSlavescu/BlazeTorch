@@ -40,6 +40,8 @@ To generate the graph trace for the optimized and base torch eager execution pro
 python3 tests/run_bert.py --generate_trace
 ```
 
+Testing Llama:
+
 traces will be hosted in a built ```tests/traces/```
 
 adapted and extended from:
