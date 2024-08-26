@@ -30,7 +30,9 @@ chmod +x build.sh
 
 ## Running Tests
 
-All tests are hosted in the tests directory. To test the optimized compiler and see the end to end speedup for BERT, run the following:
+All tests are hosted in the tests directory. To test the optimized compiler and see the following examples:
+
+Testing BERT:
 ```
 python3 tests/run_bert.py
 ```
@@ -41,6 +43,20 @@ python3 tests/run_bert.py --generate_trace
 ```
 
 Testing Llama:
+
+To successfully test the Llama-7b model, you need to create a `.env` file and paste in your huggingface access token as follows:
+
+```
+# .env
+HF_TOKEN="your token"
+```
+
+Then export the .env file stored in your project root.
+
+```
+python3 tests/run_llama.py --generate_trace
+```
+
 
 traces will be hosted in a built ```tests/traces/```
 

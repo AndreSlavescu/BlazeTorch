@@ -18,8 +18,6 @@ load_dotenv()
 HF_TOKEN = os.getenv("HF_TOKEN")
 print("HF_TOKEN: ", HF_TOKEN)
 
-login(token=HF_TOKEN)
-
 def check_output(output, name, device):
     border = "=" * 50
     header = f" {name.upper()} OUTPUT CHECK ON {str(device).upper()} "
@@ -98,7 +96,7 @@ def test_llama_model(device: torch.device, gen_trace: bool, iter: int, debug: bo
         segments_tensors = torch.randint(0, 2, (batch_size, seq_length), dtype=torch.long).to(device)
         attention_mask = torch.randint(0, 2, (batch_size, seq_length), dtype=torch.long).to(device)
 
-        model_name = "decapoda-research/llama-7b-hf"  # Replace with the correct model identifier
+        model_name = "huggyllama/llama-7b"
         model = LlamaModel.from_pretrained(model_name, use_auth_token=HF_TOKEN)
         model.config.torchscript = True
         model = model.to(device)
@@ -155,6 +153,10 @@ def test_llama_model(device: torch.device, gen_trace: bool, iter: int, debug: bo
         traceback.print_exc()
 
 if __name__ == "__main__":
+    login(token=HF_TOKEN)
+
+    time.sleep(1)
+
     parser = ArgumentParser(description="Profile Llama")
     parser.add_argument('--gen_trace', action='store_true', help='Generate execution trace')
     parser.add_argument('--debug', action='store_true', help='Enable debug mode')
