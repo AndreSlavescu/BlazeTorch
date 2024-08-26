@@ -26,16 +26,22 @@ def check_output(output, name, device):
     print(f"{border}\n")
 
     has_nan = False
+    if isinstance(output, tuple):
+        output = list(output)
+
     for i, tensor in enumerate(output):
-        if torch.isnan(tensor).any():
-            has_nan = True
-            print(f"  ❌ NaN detected in {name} output[{i}]:")
-            print(f"     • Min: {tensor.min().item():.6f}")
-            print(f"     • Max: {tensor.max().item():.6f}")
+        if isinstance(tensor, torch.Tensor):
+            if torch.isnan(tensor).any():
+                has_nan = True
+                print(f"  ❌ NaN detected in {name} output[{i}]:")
+                print(f"     • Min: {tensor.min().item():.6f}")
+                print(f"     • Max: {tensor.max().item():.6f}")
+            else:
+                print(f"  ✅ No NaN in {name} output[{i}]")
+                print(f"     • Min: {tensor.min().item():.6f}")
+                print(f"     • Max: {tensor.max().item():.6f}")
         else:
-            print(f"  ✅ No NaN in {name} output[{i}]")
-            print(f"     • Min: {tensor.min().item():.6f}")
-            print(f"     • Max: {tensor.max().item():.6f}")
+            print(f"  ⚠️ Output[{i}] is not a tensor: {type(tensor)}")
         print()
 
     if has_nan:
@@ -53,7 +59,7 @@ def replace_layers(model, device):
         if isinstance(module, GELUActivation):
             setattr(model, n, torch.nn.ReLU(inplace=True).to(device))
 
-def my_profile(f, x: List, iter: int = 1000, name: str = "profile.json", gen_trace: bool = False, device: str = "cpu"):
+def my_profile(f, x: List, iter: int = 10, name: str = "profile.json", gen_trace: bool = False, device: str = "cpu"):
     start = time.perf_counter()
     for _ in range(iter):
         f(*x)  # optimized run
