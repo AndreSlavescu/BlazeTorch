@@ -8,7 +8,10 @@ Before building, make sure you have cmake installed. Tested on cmake version 3.2
 ```
 git clone https://github.com/AndreSlavescu/BlazeTorch
 git submodule update --init --recursive
+```
 
+# Build NVFuser
+```
 # build flatbuffers with appropriate version (23 major version and 3 minor version)
 cd submodules/nvfuser/third_party/flatbuffers
 git fetch --all
@@ -20,12 +23,17 @@ make install
 cd ../../../../..
 ```
 
-## Build
+## Build BlazeTorch
 
 The project gets built with CMake by running:
 ```
 chmod +x build.sh
+
+# build without NVFuser
 ./build.sh
+
+# build with NVFuser
+./build.sh build_with_nvfuser
 ```
 
 ## Running Tests
@@ -63,4 +71,3 @@ traces will be hosted in a built ```tests/traces/```
 adapted and extended from:
 
 https://jott.live/markdown/Writing%20a%20Toy%20Backend%20Compiler%20for%20PyTorch
-

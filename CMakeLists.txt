@@ -31,17 +31,38 @@ foreach(source ${BLAZETORCH_SOURCES})
   message(STATUS "  ${source}")
 endforeach()
 
-add_subdirectory(submodules/nvfuser)
-
-add_library(
-  blazetorch SHARED 
-  ${BLAZETORCH_SOURCES}
+# Define the blazetorch target
+add_library(blazetorch SHARED
+    blazetorch/blazetorch_compiler.cc
+    blazetorch/compiler.cc
+    blazetorch/fuse_candidates.cc
+    blazetorch/fusion_passes/fusion_adddiv.cc
+    blazetorch/fusion_passes/fusion_addmul.cc
+    blazetorch/process_graph_ops.cc
+    blazetorch/register.cc
 )
 
-target_link_libraries(blazetorch "${TORCH_LIBRARIES}" nvfuser_codegen flatbuffers)
-set_property(TARGET blazetorch PROPERTY CXX_STANDARD 17)
+# Link libraries to the blazetorch target
+target_link_libraries(blazetorch
+    PRIVATE
+    ${TORCH_LIBRARIES}
+    ${CUDA_LIBRARIES}
+    pybind11::module
+)
 
-include_directories(${TORCH_INCLUDE_DIRS} ${Python3_INCLUDE_DIRS} submodules/nvfuser ${pybind11_INCLUDE_DIRS} ${FLATBUFFERS_INCLUDE_DIRS})
+# Include directories
+include_directories(${TORCH_INCLUDE_DIRS} ${Python3_INCLUDE_DIRS} ${pybind11_INCLUDE_DIRS})
+
+option(BUILD_WITH_NVFUSER "Build with nvfuser" ON)
+
+if(BUILD_WITH_NVFUSER)
+    add_subdirectory(submodules/nvfuser)
+    target_link_libraries(blazetorch PRIVATE nvfuser_codegen flatbuffers)
+    include_directories(submodules/nvfuser ${FLATBUFFERS_INCLUDE_DIRS})
+    message(STATUS "Building with nvfuser")
+else()
+    message(STATUS "Building without nvfuser")
+endif()
 
 message(STATUS "Torch_DIR: ${Torch_DIR}")
 message(STATUS "pybind11_DIR: ${pybind11_DIR}")

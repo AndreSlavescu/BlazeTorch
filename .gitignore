@@ -1,5 +1,11 @@
 build/
 hub/
 traces/
+CMakeFiles/
 .env
 token
+Makefile
+detect_cuda_compute_capabilities.cu
+detect_cuda_version.cc
+cmake_install.cmake
+CMakeCache.txt
